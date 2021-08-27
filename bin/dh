@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+file = ARGV[0]
+abort "no input file specified" if file.nil?
+
+require "./lib/doublehelix"
+
+eval File.read file

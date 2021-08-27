@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/doublehelix/generate"
+
+input_file, output_file, * = ARGV
+
+%w[input_file output_file].each do |f|
+  abort "no #{f} specified. usage: #{__FILE__} path/to/input path/to/output" if binding.local_variable_get(f).nil?
+end
+
+File.open(output_file, "wb") { |f| f << DoubleHelix.generate(File.read(input_file)) }

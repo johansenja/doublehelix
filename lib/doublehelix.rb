@@ -1,19 +1,29 @@
-$code = ""
-Object.instance_eval do
-  def const_missing(s); $code << s.to_s; 0; end
-  remove_const(:GC)  # Holy moly!
-end
-at_exit do
-  dict = { "AT"=>"00", "CG"=>"01", "GC"=>"10", "TA"=>"11" }
-  eval([$code.gsub(/../) {|s| dict[s] }].pack("b*"))
-end
+require_relative "doublehelix/generate"
 
-def doublehelix(src)
-  dict = { "00"=>["A","T"], "01"=>["C","G"], "10"=>["G","C"], "11"=>["T","A"] }
-  format = [[1,0], [0,2], [0,3], [0,4], [1,4], [2,4], [3,3], [4,2], [5,0]]
-  format += format.reverse
-  %(require "doublehelix"\n\n) + src.unpack("b*").first.gsub(/../) do |s|
-    format << (offset, dist = format.shift)
-    " " * offset + dict[s] * ("-" * dist) + "\n"
+module DoubleHelix
+  class << self
+    def run_code
+      prog = [code.gsub(ANY_TWO_CHARS) {|s| DoubleHelix::ENCODING[s] }].pack PACK_CODE
+      eval prog
+    end
+
+    def code
+      @code ||= String.new
+    end
   end
 end
+
+# for compatibility
+def doublehelix(*args)
+  DoubleHelix.generate(*args)
+end
+
+DoubleHelix::ENCODING.each_key do |k|
+  define_method(k) { DoubleHelix.code << k; 0 }
+
+  k.each_char do |c|
+    define_method(c) { DoubleHelix.code << c; 0 } unless respond_to? c.to_sym
+  end
+end
+
+at_exit { DoubleHelix.run_code }
