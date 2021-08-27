@@ -106,7 +106,7 @@ or with the cli
   dh-gen input/file.rb output/file.rb
 ```
 
-and then run the generate output like so
+and then run the generated output like so
 
 ```bash
   dh output/file.rb
